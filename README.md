@@ -1,2 +1,2 @@
-# Short-Zly
+# Shortsify
 A SaaS designed to streamline and simplify your YT Shorts editing &amp; management workflow.
