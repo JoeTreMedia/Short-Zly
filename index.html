@@ -753,55 +753,80 @@
       margin: 0 auto;
     }
 
+    /* Steps Section - Update these styles */
     .steps-visual {
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 500px;
-      perspective: 1000px;
+      perspective: none; /* Remove perspective */
     }
-
+    
     .device-mockup {
       position: absolute;
       transition: transform 0.5s ease;
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .device-mockup:nth-child(1) {
-      top: 5%;
-      left: 5%;
-      transform: rotate(-15deg) translateZ(-30px);
-      width: 220px;
-    }
-
-    .device-mockup:nth-child(2) {
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) translateZ(20px);
-      width: 320px;
-      z-index: 2;
-    }
-
-    .device-mockup:nth-child(3) {
-      bottom: 5%;
-      right: 5%;
-      transform: rotate(15deg) translateZ(-30px);
-      width: 220px;
-    }
-
-    .device-mockup:hover {
-      transform: scale(1.05) translateZ(50px);
-      z-index: 3;
-    }
-
-    .device-image {
-      width: 100%;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       border-radius: 10px;
-      transition: transform 0.3s ease;
+      overflow: hidden;
+      width: 350px; /* All devices same width */
+      max-width: 350px;
+      height: auto;
+      left: 50%;
+      transform: translateX(-50%); /* Center horizontally */
+    }
+    
+    .device-mockup:nth-child(1) {
+      top: -175px; /* Position at top */
+      z-index: 3; /* Top-most image */
+    }
+    
+    .device-mockup:nth-child(2) {
+      top: 137px; /* Position in middle */
+      z-index: 2;
+    }
+    
+    .device-mockup:nth-child(3) {
+      top: 483px; /* Position at bottom */
+      z-index: 1;
+    }
+    
+    .device-mockup:hover {
+      transform: translateX(-50%); /* Keep centered on hover - no animation */
+      /* No z-index change */
+    }
+    
+    .device-image {
+      width: 100%;
+      height: auto;
+      display: block;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      border-radius: 10px;
+      transition: none; /* Remove transition */
+      object-fit: contain; /* Ensure image fits properly */
+    }
+    
+    /* Update media query for mobile */
+    @media (max-width: 768px) {
+      .steps-visual {
+        height: 600px; /* Increase height to accommodate stacked images */
+      }
+      
+      .device-mockup {
+        width: 280px; /* Slightly smaller on mobile */
+      }
+      
+      .device-mockup:nth-child(1) {
+        top: 20px;
+      }
+      
+      .device-mockup:nth-child(2) {
+        top: 160px;
+      }
+      
+      .device-mockup:nth-child(3) {
+        top: 300px;
+      }
     }
 
     .steps-content {
@@ -1853,13 +1878,13 @@
       <div class="steps-grid">
         <div class="steps-visual">
           <div class="device-mockup">
-            <img src="images/device1.png" alt="Smartphones" class="device-image">
+            <img src="images/image30.png" alt="Smartphones" class="device-image">
           </div>
           <div class="device-mockup">
-            <img src="images/device2.png" alt="Laptop" class="device-image">
+            <img src="images/image31.png" alt="Laptop" class="device-image">
           </div>
           <div class="device-mockup">
-            <img src="images/device3.png" alt="Tablet" class="device-image">
+            <img src="images/image32.png" alt="Tablet" class="device-image">
           </div>
         </div>
         <div class="steps-content">
