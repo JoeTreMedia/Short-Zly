@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Redirecting...</title>
+  <script>
+    window.location.href = "/#faq";
+    
+    // If above doesn't scroll automatically, this will:
+    window.onload = function() {
+      if (window.location.hash === '#faq') {
+        setTimeout(function() {
+          const element = document.getElementById('faq');
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 500);
+      }
+    }
+  </script>
+</head>
+<body>
+  <p>Redirecting to FAQ section...</p>
+</body>
+</html>

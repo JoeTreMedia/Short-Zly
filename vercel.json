@@ -1,8 +1,14 @@
 {
   "rewrites": [
+    { "source": "/login", "destination": "/auth_page.html" },
+    { "source": "/contact", "destination": "/contact.html" },
     { "source": "/terms", "destination": "/terms.html" },
-    { "source": "/privacy_policy", "destination": "/privacy_policy.html" },
-    { "source": "/refund_policy", "destination": "/refund_policy.html" },
-    { "source": "/contact", "destination": "/contact.html" }
+    { "source": "/privacy", "destination": "/privacy_policy.html" },
+    { "source": "/refund", "destination": "/refund_policy.html" },
+    
+    // Handle section fragments differently
+    { "source": "/features", "destination": "/" },
+    { "source": "/why-us", "destination": "/" },
+    { "source": "/faq", "destination": "/" }
   ]
 }

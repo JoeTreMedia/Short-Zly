@@ -1684,10 +1684,10 @@
       <div class="navbar-menu">
         <a href="#features" class="navbar-link">Features</a>
         <a href="#why-us" class="navbar-link">Why Us?</a>
-        <a href="contact.html" class="navbar-link">Contact</a>
+        <a href="/contact" class="navbar-link">Contact</a>
         <a href="#faq" class="navbar-link">Q&A's</a>
       </div>
-      <button class="navbar-button">
+      <button class="navbar-button" onclick="window.location.href='/login'">
         Enter App
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M8 0L6.59 1.41L12.17 7H0V9H12.17L6.59 14.59L8 16L16 8L8 0Z" fill="white"/>
@@ -2176,16 +2176,16 @@
           <ul class="footer-links">
             <li><a href="#features">Features</a></li>
             <li><a href="#why-us">Why Us?</a></li>
-            <li><a href="contact.html">Contact</a></li>
+            <li><a href="/contact">Contact</a></li>
             <li><a href="#faq">Q&A's</a></li>
           </ul>
         </div>
         <div class="footer-nav">
           <h4>Legal</h4>
           <ul class="footer-links">
-            <li><a href="terms.html">Terms</a></li>
-            <li><a href="privacy_policy.html">Privacy Policy</a></li>
-            <li><a href="refund_policy.html">Refund Policy</a></li>
+            <li><a href="/terms">Terms</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+            <li><a href="/refund">Refund Policy</a></li>
           </ul>
         </div>
       </div>
@@ -2358,5 +2358,31 @@ document.addEventListener('DOMContentLoaded', function() {
   
 </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'922c5b741f801d72',t:'MTc0MjM4MDg4NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get the current path
+    const path = window.location.pathname;
+    
+    // Map paths to section IDs
+    const sectionMap = {
+      '/features': 'features',
+      '/why-us': 'why-us',
+      '/faq': 'faq'
+    };
+    
+    // If we have a matching section, scroll to it
+    if (sectionMap[path]) {
+      const sectionId = sectionMap[path];
+      const section = document.getElementById(sectionId);
+      
+      if (section) {
+        // Slight delay to ensure DOM is fully loaded
+        setTimeout(() => {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      }
+    }
+  });
+</script>
 </body>
 </html>
