@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=1.0, viewport-fit=cover">
+  <title>Shortsify - AI Powered Short-Form Video Creation</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&family=Merriweather:wght@400;700&family=IBM+Plex+Serif:wght@400;500;600&family=Figma+Hand&family=Cantata+One&display=swap" rel="stylesheet">
+
+  <style>
+    /* Base styles and resets */
+    :root {
+      --primary-bg: #03002a;
+      --primary-gradient: linear-gradient(229.65deg, #03002a 29%, #0a0646 100%);
+      --secondary-gradient: linear-gradient(141.62deg, #a37df4 0%, #34137c 100%);
+      --accent-color: #a37df4;
+      --text-light: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.6);
+      --text-accent: #ffdcb4;
+      --highlight-blue: #05d5fa;
+      --card-bg: linear-gradient(141.62deg, #a37df4 0%, #34137c 100%);
+      --card-border: 1px solid rgba(255, 255, 255, 0.8);
+      --tag-bg: #110f3b;
+      --tag-border: 0.4px solid #b2c0ef;
+      --card-radius: 20px;
+      --button-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%);
+      --section-spacing: 5.5rem; /* Reduced from 6rem */
+      --container-padding: 1.5rem;
+      --content-max-width: 1400px;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Merriweather', serif;
+      background: var(--primary-gradient);
+      color: var(--text-light);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    img, video {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Container and layout */
+    .container {
+      width: 100%;
+      max-width: var(--content-max-width);
+      margin: 0 auto;
+      padding: 0 var(--container-padding);
+    }
+
+    section {
+      position: relative;
+      padding: 5.5rem 0; /* Reduced from 6rem */
+    }
+
+    .bg-stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .bg-stars img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5 {
+      margin-bottom: 1.3rem; /* Reduced from 1.5rem */
+      line-height: 1.2;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 4.2vw, 3.8rem); /* Reduced from 4.5rem */
+      font-weight: 400;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 3.6vw, 3.2rem); /* Reduced from 3.5rem */
+      font-weight: 400;
+    }
+
+    h3 {
+      font-size: clamp(1.3rem, 2.8vw, 2.2rem); /* Reduced from 2.5rem */
+      font-weight: 500;
+    }
+
+    p {
+      margin-bottom: 1.3rem; /* Reduced from 1.5rem */
+    }
+
+    .text-highlight {
+      color: var(--accent-color);
+      font-weight: 700;
+    }
+
+    .text-accent {
+      color: var(--text-accent);
+    }
+
+    .text-hand {
+      font-family: 'Figma Hand', cursive;
+      color: var(--highlight-blue);
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-mono {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .text-muted {
+      color: var(--text-muted);
+    }
+
+    /* Navbar */
+    .navbar {
+      position: fixed;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      max-width: 800px;
+      z-index: 1000;
+      background: rgba(3, 0, 42, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 20px; /* Reduced from 40px to be more rectangular */
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.4rem 1rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .navbar-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.2rem;
+    }
+
+    .navbar-logo {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.5s ease-out;
+    }
+
+    .navbar-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .navbar-menu {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      flex: 1;
+    }
+
+    .navbar-link {
+      color: var(--text-light);
+      text-decoration: none;
+      font-size: 0.95rem;
+      font-family: 'Merriweather', serif;
+      transition: all 0.5s ease-out;
+      position: relative;
+    }
+
+    .navbar-link:after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 0;
+      height: 1px;
+      background: var(--accent-color);
+      transition: width 0.5s ease-out;
+    }
+
+    .navbar-link:hover:after {
+      width: 100%;
+    }
+
+    .navbar-button {
+      background: var(--secondary-gradient);
+      border: none;
+      color: var(--text-light);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-family: 'Alexandria', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.5s ease-out;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .navbar-button:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .divider {
+      width: 1px;
+      height: 30px;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.9rem 1.8rem; /* Reduced from 1rem 2rem */
+      font-family: 'Alexandria', sans-serif;
+      font-weight: 600;
+      font-size: 1rem; /* Reduced from 1.125rem */
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      border: none;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .btn:hover:before {
+      left: 100%;
+    }
+
+    .btn-primary {
+      background: var(--button-bg);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: var(--text-light);
+    }
+
+    .btn-primary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Feature Tag */
+    .feature-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 1rem; /* Reduced from 0.5rem 1.25rem */
+      background: var(--tag-bg);
+      border: var(--tag-border);
+      border-radius: 18px;
+      margin-bottom: 1.3rem; /* Reduced from 1.5rem */
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      transform: translateY(0);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .feature-tag:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-tag span {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.8rem; /* Reduced from 0.875rem */
+      color: var(--text-light);
+    }
+
+    /* Email signup */
+    .email-signup {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 18px;
+      overflow: hidden;
+      margin: 2.6rem auto 0.5rem; /* Reduced from 3rem */
+      max-width: 700px; /* Reduced from 750px */
+      width: 100%;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      transition: all 0.5s ease-out;
+    }
+
+    .email-signup:hover {
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .email-input {
+      flex: 1;
+      padding: 1.5rem 2rem; /* Reduced from 1.75rem 2.5rem */
+      background: transparent;
+      border: none;
+      color: var(--text-light);
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 1.2rem; /* Reduced from 1.35rem */
+    }
+
+    .email-input::placeholder {
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .email-submit {
+      padding: 1.5rem 2.5rem; /* Reduced from 1.75rem 3rem */
+      background: var(--button-bg);
+      border: none;
+      border-left: 1px solid rgba(255, 255, 255, 0.5);
+      color: var(--text-light);
+      font-family: 'Alexandria', sans-serif;
+      font-weight: 600;
+      font-size: 1.2rem; /* Reduced from 1.35rem */
+      cursor: pointer;
+      transition: all 0.5s ease-out;
+      min-width: 180px; /* Reduced from 200px */
+      text-align: center;
+    }
+
+    .email-submit:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Hero Section */
+    .hero {
+      min-height: 90vh; /* Reduced from 100vh */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-top: 150px; /* Reduced from 180px - starts 30px higher */
+      overflow: hidden;
+      margin-bottom: 3.5rem; /* Reduced from 4rem */
+      position: relative;
+    }
+    
+    .hero-frame {
+      position: absolute;
+      top: 10%;
+      left: 50%;
+      width: 85%;
+      height: 80%;
+      border: 1px solid rgba(163, 125, 244, 0.3);
+      border-radius: 65px;
+      background: linear-gradient(141.62deg, rgba(163, 125, 244, 0.05) 0%, rgba(52, 19, 124, 0.05) 100%);
+      pointer-events: none;
+      z-index: -1;
+      transform: translateX(-50%);
+      box-shadow: 0 0 100px rgba(163, 125, 244, 0.1);
+    }
+
+    .hero-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 800px; /* Reduced from 900px */
+      margin: 0 auto;
+      position: relative;
+    }
+
+    .hero-title {
+      margin-bottom: 1.7rem; /* Reduced from 2rem */
+      animation: fadeIn 1.5s ease-out, slideUp 1.5s ease-out;
+    }
+
+    .hero-subtitle {
+      max-width: 650px; /* Reduced from 700px */
+      margin-bottom: 2.5rem; /* Reduced from 3rem */
+      color: var(--text-muted);
+      font-size: 1.1rem; /* Reduced from 1.25rem */
+      animation: fadeIn 1.5s ease-out 0.5s both, slideUp 1.5s ease-out 0.5s both;
+    }
+
+    .email-field-container {
+      position: relative;
+      width: 100%;
+      max-width: 650px; /* Reduced from 700px */
+    }
+
+    .platform-match {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.9rem 0 2.5rem; /* Reduced from 1rem 0 3rem */
+      animation: fadeIn 1.5s ease-out 0.8s both;
+      opacity: 0.6;
+      font-size: 0.85rem; /* Reduced from 0.9rem */
+    }
+
+    .platform-match p {
+      margin-right: 1rem;
+      margin-bottom: 0;
+    }
+
+    .platform-icons {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .platform-icon {
+      width: 18px; /* Reduced from 20px */
+      height: 18px; /* Reduced from 20px */
+      opacity: 0.8;
+      transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+    }
+
+    .platform-icon:hover {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+
+    .hero-videos {
+      display: flex;
+      gap: 2rem; /* Reduced from 3rem */
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 4rem; /* Reduced from 5rem */
+      perspective: 1200px;
+      animation: fadeIn 1.5s ease-out 1.1s both;
+    }
+
+    .hero-video {
+      width: 100%;
+      max-width: 240px; /* Reduced from 320px - MUCH SMALLER */
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+      transition: transform 0.8s ease-out, box-shadow 0.8s ease-out;
+      transform: rotateY(10deg);
+    }
+
+    .hero-video:hover {
+      transform: rotateY(0) scale(1.03);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .hero-video video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-video.main {
+      max-width: 280px; /* Reduced from 380px - MUCH SMALLER */
+      transform: rotateY(-5deg) scale(1.1);
+      z-index: 2;
+    }
+    
+    .hero-video.main video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-video.main:hover {
+      transform: rotateY(0) scale(1.12);
+    }
+
+    /* Features Section */
+    .features-section {
+      padding: 6rem 2rem;
+      position: relative;
+    }
+
+    .features-section:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(163, 125, 244, 0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .features-header {
+      max-width: 800px; /* Reduced from 900px */
+      margin: 0 auto 3.5rem; /* Reduced from 4rem */
+      text-align: center;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Reduced from 350px */
+      gap: 2rem; /* Reduced from 2.5rem */
+      margin-top: 3.5rem; /* Reduced from 4rem */
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      border: var(--card-border);
+      padding: 2rem; /* Reduced from 2.5rem */
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transform: translateY(0);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .feature-card:before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      transform: rotate(30deg);
+      pointer-events: none;
+    }
+
+    .feature-icon {
+      width: 70px; /* Reduced from 80px */
+      height: 70px; /* Reduced from 80px */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      margin-bottom: 1.7rem; /* Reduced from 2rem */
+      border: 3px solid var(--text-light);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover .feature-icon {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .feature-title {
+      font-family: 'Alexandria', sans-serif;
+      font-weight: 700;
+      font-size: 1.6rem; /* Reduced from 1.75rem */
+      margin-bottom: 1.3rem; /* Reduced from 1.5rem */
+      position: relative;
+      z-index: 1;
+    }
+
+    .feature-desc {
+      color: var(--text-muted);
+      margin-bottom: 1.7rem; /* Reduced from 2rem */
+      font-size: 1rem; /* Reduced from 1.125rem */
+      position: relative;
+      z-index: 1;
+    }
+
+    .feature-visual {
+      margin-top: auto;
+      background: rgba(63, 63, 63, 0.8);
+      border-radius: 14px;
+      border: 0.5px solid #e2e2e2;
+      padding: 1.3rem; /* Reduced from 1.5rem */
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 1;
+      min-height: 250px; /* Reduced from 300px */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .feature-tall {
+      grid-row: span 2;
+    }
+
+    /* New Stats Dashboard Design */
+    .stats-dashboard {
+      background: rgba(30, 30, 40, 0.9);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      height: 250px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 10px;
+    }
+
+    .stats-title {
+      font-size: 16px;
+      color: white;
+      font-weight: 600;
+      font-family: 'IBM Plex Mono', monospace;
+    }
+
+    .stats-period {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 8px;
+      border-radius: 12px;
+    }
+
+    .stats-chart {
+      height: 170px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-top: 10px;
+      position: relative;
+    }
+
+    .stats-chart::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-image: linear-gradient(to right, transparent 49.5%, rgba(255, 255, 255, 0.05) 50%),
+                        linear-gradient(to bottom, transparent 49.5%, rgba(255, 255, 255, 0.05) 50%);
+      background-size: 40px 40px;
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .stats-bar {
+      width: 15%;
+      background: #d9d9d9; /* Light gray */
+      border-radius: 6px 6px 0 0;
+      position: relative;
+      z-index: 2;
+      min-width: 20px;
+      transition: height 0.5s ease;
+      box-shadow: 0 0 10px rgba(163, 125, 244, 0.5);
+    }
+
+    .stats-bar:hover {
+      background: #a5a5a5; /* Darker gray on hover */
+      box-shadow: 0 0 15px rgba(163, 125, 244, 0.7);
+    }
+
+    .stats-bar:nth-child(1) { height: 65%; }
+    .stats-bar:nth-child(2) { height: 85%; }
+    .stats-bar:nth-child(3) { height: 45%; }
+    .stats-bar:nth-child(4) { height: 95%; }
+    .stats-bar:nth-child(5) { height: 75%; }
+
+    .stats-bar::after {
+      content: attr(data-value);
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 12px;
+      color: white;
+      font-weight: 600;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .stats-bar:hover::after {
+      opacity: 1;
+    }
+
+    .stats-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .stats-label {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.7);
+      text-align: center;
+      width: 15%;
+    }
+
+    /* Success Stories Section */
+    .success-section {
+      padding: 6rem 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .success-header {
+      max-width: 800px; /* Reduced from 900px */
+      margin: 0 auto 3.5rem; /* Reduced from 4rem */
+      text-align: center;
+    }
+
+    .success-carousel {
+      position: relative;
+      overflow: hidden;
+      padding: 2rem 0;
+    }
+
+    .success-carousel-inner {
+      display: flex;
+      animation: scrollX 30s linear infinite;
+      width: fit-content;
+    }
+
+    @keyframes scrollX {
+      0% {
+        transform: translateX(0);
+      }
+      100% {
+        transform: translateX(-50%);
+      }
+    }
+
+    .success-card {
+      flex: 0 0 260px; /* Reduced from 300px */
+      height: 520px; /* Reduced from 600px */
+      margin-right: 1.7rem; /* Reduced from 2rem */
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .success-card:hover {
+      transform: translateY(-10px) scale(1.02);
+    }
+
+    .success-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .success-fade {
+      position: absolute;
+      width: 260px; /* Reduced from 300px */
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .success-fade.left {
+      left: 0;
+      background: linear-gradient(90deg, var(--primary-bg) 0%, transparent 100%);
+    }
+
+    .success-fade.right {
+      right: 0;
+      background: linear-gradient(270deg, var(--primary-bg) 0%, transparent 100%);
+    }
+
+    /* Testimonials Section */
+    .testimonials-section {
+      padding: 6rem 0;
+    }
+
+    .testimonials-header {
+      max-width: 800px; /* Reduced from 900px */
+      margin: 0 auto 3.5rem; /* Reduced from 4rem */
+      text-align: center;
+    }
+
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Reduced from 350px */
+      gap: 2.5rem; /* Reduced from 3rem */
+    }
+
+    .testimonial-card {
+      background: radial-gradient(circle, rgba(166, 160, 178, 0.8) 0%, rgb(84, 69, 113) 100%);
+      border-radius: 30px;
+      padding: 2.5rem; /* Reduced from 3rem */
+      position: relative;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      height: 100%;
+    }
+
+    .testimonial-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .testimonial-profile {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.7rem; /* Reduced from 2rem */
+    }
+
+    .testimonial-avatar {
+      width: 85px; /* Reduced from 100px */
+      height: 85px; /* Reduced from 100px */
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .testimonial-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .testimonial-card:hover .testimonial-avatar img {
+      transform: scale(1.1);
+    }
+
+    .testimonial-info h4 {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      font-size: 1.15rem; /* Reduced from 1.25rem */
+    }
+
+    .testimonial-info p {
+      font-size: 0.9rem; /* Reduced from 1rem */
+      opacity: 0.8;
+    }
+
+    .testimonial-stars {
+      display: flex;
+      gap: 0.35rem; /* Reduced from 0.375rem */
+      margin-bottom: 1.3rem; /* Reduced from 1.5rem */
+    }
+
+    .testimonial-stars img {
+      width: 22px; /* Reduced from 24px */
+      height: 22px; /* Reduced from 24px */
+    }
+
+    .testimonial-text {
+      font-family: 'IBM Plex Serif', serif;
+      color: var(--text-muted);
+      font-style: italic;
+      text-shadow: 0 4px 25px rgba(0, 0, 0, 1);
+      font-size: 1.15rem; /* Reduced from 1.25rem */
+      line-height: 1.7;
+    }
+
+    /* CTA Section */
+    .cta-section {
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+      margin: 7rem 2rem; /* Reduced from 8rem 2rem */
+    }
+
+    .cta-wrapper {
+      width: 90%;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      border-radius: 45px; /* Reduced from 65px */
+      background: linear-gradient(215.98deg, #8166bb 0%, #3b2e55 100%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.4);
+      overflow: hidden; /* Changed from visible to hidden */
+      padding: 2rem 0; /* Added general padding */
+    }
+
+    .cta-logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    /* Fix for the CTA logo to completely fill the circle */
+    .cta-logo {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      border: 3px solid rgba(255, 255, 255, 0.8);
+      padding: 0;
+      position: relative; /* For absolute positioning of child */
+    }
+    
+    .cta-logo img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill; /* Changed from cover to fill */
+      margin: 0;
+      padding: 0;
+    }
+
+    .cta-background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%; /* Changed to 100% from fixed value */
+      z-index: 0;
+      overflow: hidden; /* Added to fix image overflow */
+    }
+
+    .cta-background .cta-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000;
+      opacity: 0.4;
+      z-index: 1;
+    }
+
+    .cta-background img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover; /* Important to fix the cutoff issue */
+      opacity: 0.4;
+    }
+
+    .cta-content {
+      position: relative;
+      z-index: 2;
+      padding: 2rem 2rem 3.5rem; /* Reduced from 6rem 2rem 4rem */
+      text-align: center;
+    }
+
+    .cta-title {
+      font-size: clamp(2.25rem, 4.5vw, 3.25rem); /* Reduced from 3.5rem */
+      margin-bottom: 1.7rem; /* Reduced from 2rem */
+      line-height: 1.3;
+    }
+
+    .cta-description {
+      font-size: 1.35rem; /* Reduced from 1.5rem */
+      margin-bottom: 2.5rem; /* Reduced from 3rem */
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 750px; /* Reduced from 800px */
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* FAQ Section */
+    .faq-section {
+      padding: 6rem 0;
+    }
+
+    .faq-header {
+      max-width: 800px; /* Reduced from 900px */
+      margin: 0 auto 3.5rem; /* Reduced from 4rem */
+      text-align: center;
+    }
+
+    .faq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Reduced from 350px */
+      gap: 2rem; /* Reduced from 2.5rem */
+    }
+
+    .faq-item {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 2rem; /* Reduced from 2.5rem */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      height: 100%;
+    }
+
+    .faq-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+      border-color: rgba(163, 125, 244, 0.3);
+    }
+
+    .faq-question {
+      font-weight: 700;
+      margin-bottom: 0; /* Changed from 1.5rem for collapsible functionality */
+      font-size: 1.35rem; /* Reduced from 1.5rem */
+      position: relative;
+      padding-right: 30px; /* Room for toggle icon */
+      cursor: pointer; /* Added for clickability */
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Toggle indicator for FAQ */
+    .faq-toggle {
+      display: inline-block;
+      font-size: 1.5rem;
+      line-height: 1;
+      transition: transform 0.3s ease;
+    }
+
+    .faq-item.active .faq-toggle {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, margin-top 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+    }
+
+    .faq-item.active .faq-answer {
+      max-height: 500px;
+      margin-top: 1.3rem; /* Space after question */
+      opacity: 1;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 5rem 2rem 2.5rem; /* Reduced from 6rem 2rem 3rem */
+      background: linear-gradient(to bottom, transparent, var(--primary-bg));
+      position: relative;
+    }
+
+    .footer:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      background: linear-gradient(to bottom, transparent, rgba(3, 0, 42, 0.1));
+      pointer-events: none;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); /* Reduced from 250px */
+      gap: 3.5rem; /* Reduced from 4rem */
+    }
+
+    .footer-logo {
+      width: 110px; /* Reduced from 120px */
+      margin-bottom: 1.3rem; /* Reduced from 1.5rem */
+      transition: transform 0.3s ease;
+      border-radius: 15px; /* Added rounded corners */
+      overflow: hidden;
+    }
+
+    .footer-logo:hover {
+      transform: scale(1.1);
+    }
+
+    .footer-nav h4 {
+      font-family: 'Alexandria', sans-serif;
+      font-weight: 600;
+      margin-bottom: 1.7rem; /* Reduced from 2rem */
+      font-size: 1.35rem; /* Reduced from 1.5rem */
+      position: relative;
+      display: inline-block;
+    }
+
+    .footer-nav h4:after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: var(--accent-color);
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 1.1rem; /* Reduced from 1.25rem */
+    }
+
+    .footer-links a {
+      color: var(--text-light);
+      text-decoration: none;
+      font-family: 'Alexandria', sans-serif;
+      font-weight: 300;
+      font-size: 1rem; /* Reduced from 1.125rem */
+      opacity: 0.8;
+      transition: all 0.3s ease;
+      position: relative;
+      padding-left: 1.25rem;
+    }
+
+    .footer-links a:before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      top: 0;
+      transition: transform 0.3s ease;
+      opacity: 0;
+    }
+
+    .footer-links a:hover {
+      opacity: 1;
+      padding-left: 1.5rem;
+    }
+
+    .footer-links a:hover:before {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 1.1rem; /* Reduced from 1.25rem */
+      margin-top: 1.7rem; /* Reduced from 2rem */
+    }
+
+    .social-icon {
+      width: 45px; /* Reduced from 50px */
+      height: 45px; /* Reduced from 50px */
+      border-radius: 50%;
+      border: 1px solid var(--text-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .social-icon:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .social-icon img {
+      width: 23px; /* Reduced from 25px */
+      height: 23px; /* Reduced from 25px */
+      transition: transform 0.3s ease;
+    }
+
+    .social-icon:hover img {
+      transform: scale(1.2);
+    }
+
+    .footer-bottom {
+      margin-top: 4.5rem; /* Reduced from 5rem */
+      padding-top: 2.3rem; /* Reduced from 2.5rem */
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+      font-size: 0.9rem; /* Reduced from 1rem */
+      opacity: 0.8;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+      }
+      to {
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.03);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .animate-pulse {
+      animation: pulse 3s infinite ease-out;
+    }
+
+    /* Media Queries */
+    @media (max-width: 1200px) {
+      .features-grid, 
+      .testimonials-grid,
+      .faq-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+      
+      .cta-content {
+        padding: 2.75rem;
+      }
+    }
+
+    @media (max-width: 992px) {
+      :root {
+        --container-padding: 2rem;
+        --section-spacing: 4.5rem;
+      }
+
+      .navbar-menu {
+        gap: 1.25rem;
+      }
+
+      .hero-videos {
+        flex-direction: column;
+      }
+
+      .hero-video, .hero-video.main {
+        max-width: 350px;
+        transform: none !important;
+      }
+      
+      .cta-content {
+        padding: 2.25rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --container-padding: 1.5rem;
+        --section-spacing: 3.5rem;
+      }
+
+      .navbar {
+        padding: 0.5rem;
+        width: 95%;
+      }
+
+      .navbar-container {
+        justify-content: center;
+      }
+
+      .navbar-menu {
+        display: none; /* Mobile menu would need JS to toggle */
+      }
+
+      .navbar-logo {
+        margin: 0;
+      }
+      
+      .navbar-mobile-menu {
+        display: block;
+      }
+
+      .features-grid, 
+      .testimonials-grid,
+      .faq-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .success-card {
+        flex: 0 0 230px;
+        height: 460px;
+      }
+
+      .testimonial-card {
+        padding: 1.75rem;
+      }
+
+      .footer-content {
+        grid-template-columns: 1fr;
+        gap: 2.75rem;
+      }
+      
+      .cta-content {
+        padding: 1.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --container-padding: 1.25rem;
+        --section-spacing: 3rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.75rem;
+      }
+
+      .hero {
+        padding-top: 100px;
+      }
+
+      .email-signup {
+        flex-direction: column;
+      }
+
+      .email-input, .email-submit {
+        width: 100%;
+        padding: 1rem;
+        text-align: center;
+      }
+
+      .email-submit {
+        border-left: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .testimonial-profile {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .testimonial-avatar {
+        margin: 0 auto;
+      }
+
+      .success-card {
+        flex: 0 0 180px;
+        height: 380px;
+      }
+      
+      .cta-content {
+        padding: 1.35rem;
+      }
+      
+      .feature-card {
+        padding: 1.75rem;
+      }
+      
+      .faq-item {
+        padding: 1.35rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Background Stars -->
+  <div class="bg-stars">
+    <img src="images/image1.png" alt="Stars Background">
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-container">
+      <div class="navbar-logo">
+        <img src="images/image29.png" alt="Shortsify Logo">
+      </div>
+      <div class="navbar-menu">
+        <a href="#features" class="navbar-link">Features</a>
+        <a href="#why-us" class="navbar-link">Why Us?</a>
+        <a href="#contact" class="navbar-link">Contact</a>
+        <a href="#faq" class="navbar-link">Q&A's</a>
+      </div>
+      <button class="navbar-button">
+        Enter App
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M8 0L6.59 1.41L12.17 7H0V9H12.17L6.59 14.59L8 16L16 8L8 0Z" fill="white"/>
+        </svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-frame"></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="feature-tag">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0L6.59 1.41L12.17 7H0V9H12.17L6.59 14.59L8 16L16 8L8 0Z" fill="white"/>
+          </svg>
+          <span>Automatic Content Generation</span>
+        </div>
+        
+        <h1 class="hero-title">
+          Short videos, big stories—made <span class="text-hand">easy</span>.
+        </h1>
+        
+        <p class="hero-subtitle">
+          Generate viral short-form content effortlessly with Shortsify's AI-powered platform. Say goodbye to your old workflow!
+        </p>
+        
+        <div class="email-field-container">
+          <div class="email-signup">
+            <input type="email" placeholder="Enter your email address..." class="email-input">
+            <button class="email-submit">Join Wait-list</button>
+          </div>
+          <div class="platform-match">
+            <p>Perfect-Match for:</p>
+            <div class="platform-icons">
+              <img src="images/image27.png" alt="YouTube" class="platform-icon">
+              <img src="images/image28.png" alt="TikTok" class="platform-icon">
+              <img src="images/image26.png" alt="Instagram" class="platform-icon">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="hero-videos">
+        <div class="hero-video">
+          <video autoplay loop muted playsinline>
+            <source src="videos/video1.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="hero-video main">
+          <video autoplay loop muted playsinline>
+            <source src="videos/video2.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="hero-video">
+          <video autoplay loop muted playsinline>
+            <source src="videos/video3.mp4" type="video/mp4">
+          </video>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section" id="features">
+    <div class="container">
+      <div class="features-header">
+        <div class="feature-tag">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0L6.59 1.41L12.17 7H0V9H12.17L6.59 14.59L8 16L16 8L8 0Z" fill="white"/>
+          </svg>
+          <span>Our Amazing Features:</span>
+        </div>
+        
+        <h2>With 'Shortsify' you get <span class="text-accent">ALL THIS</span> and more!</h2>
+        
+        <p class="text-muted text-mono">You are NOT ready for this change...</p>
+      </div>
+      
+      <div class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card feature-tall">
+          <div class="feature-icon">
+            <img src="images/image21.png" alt="AI Script Writer" width="32" height="32">
+          </div>
+          <h3 class="feature-title">High-Level AI Script Writer:</h3>
+          <p class="feature-desc">Generates viral-ready scripts instantly using the best LLM's out there.</p>
+          
+          <div class="feature-visual">
+            <div style="background: #3f3f3f; padding: 15px; border-radius: 10px;">
+              <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <div style="background: linear-gradient(180deg, #d9d9d9 0%, #737373 100%); padding: 10px; border-radius: 14px; max-width: 80%;">
+                  <p style="margin: 0;">Hi there!</p>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <div style="background: linear-gradient(180deg, #d9d9d9 0%, #737373 100%); padding: 10px; border-radius: 14px; max-width: 80%;">
+                  <p style="margin: 0;">Make me a Reddit Story.</p>
+                </div>
+              </div>
+              <div style="display: flex; margin-bottom: 10px;">
+                <div style="background: #1a1a1a; padding: 10px; border-radius: 14px; max-width: 80%;">
+                  <p style="margin: 0;">Hey user #5938!<br><br>I'll generate an engaging reddit story for you now.</p>
+                </div>
+              </div>
+              <div style="display: flex; margin-bottom: 10px;">
+                <div style="background: #1a1a1a; padding: 10px; border-radius: 14px; max-width: 80%;">
+                  <p style="margin: 0;">Working on your Reddit story now...<br>Would you like a specific theme or topic?</p>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <div style="background: linear-gradient(180deg, #d9d9d9 0%, #737373 100%); padding: 10px; border-radius: 14px; max-width: 80%;">
+                  <p style="margin: 0;">Something about an unexpected inheritance.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <img src="images/image23.png" alt="Ready Made Presets" width="32" height="32">
+          </div>
+          <h3 class="feature-title">Ready Made Presets:</h3>
+          <p class="feature-desc">Pre-built, viral-ready video templates tailored for all your specific niches. Don't waste time, start creating now!</p>
+        </div>
+        
+        <!-- Feature 3 -->
+        <div class="feature-card feature-tall">
+          <div class="feature-icon">
+            <img src="images/image24.png" alt="Automated Editing" width="32" height="32">
+          </div>
+          <h3 class="feature-title">Fully Automated Editing:</h3>
+          <p class="feature-desc">Streamlines your workflow—<br>AI-powered tools handle cuts, clips, VO's, and captions instantly.</p>
+          
+          <div class="feature-visual">
+            <div style="background: #3f3f3f; padding: 15px; border-radius: 10px;">
+              <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                <div style="height: 7px; background: #d9d9d9; border-radius: 3px; width: 20px;"></div>
+                <div style="height: 7px; background: #d9d9d9; border-radius: 3px; width: 15px;"></div>
+                <div style="height: 7px; background: #d9d9d9; border-radius: 3px; width: 25px;"></div>
+                <div style="height: 7px; background: #d9d9d9; border-radius: 3px; width: 10px;"></div>
+              </div>
+              
+              <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="height: 60px; background: #a5a5a5; border-radius: 5px; width: 30%;"></div>
+                <div style="height: 60px; background: #a5a5a5; border-radius: 5px; width: 40%;"></div>
+                <div style="height: 60px; background: #a5a5a5; border-radius: 5px; width: 30%;"></div>
+              </div>
+              
+              <div style="height: 14px; background: #d9d9d9; border-radius: 3px; width: 100%; margin-bottom: 15px;"></div>
+              
+              <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                <div style="height: 80px; background: #a5a5a5; border-radius: 5px; width: 45%;"></div>
+                <div style="height: 80px; background: #a5a5a5; border-radius: 5px; width: 55%;"></div>
+              </div>
+              
+              <div style="height: 14px; background: #d9d9d9; border-radius: 3px; width: 80%; margin-bottom: 15px;"></div>
+              
+              <div style="display: flex; justify-content: center; margin-top: 20px;">
+                <div style="width: 50px; height: 50px; background: #d9d9d9; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                  <div style="width: 0; height: 0; border-top: 12px solid transparent; border-left: 20px solid #333; border-bottom: 12px solid transparent;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Feature 4 - Updated Stats Display -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <img src="images/image22.png" alt="Track Stats" width="32" height="32">
+          </div>
+          <h3 class="feature-title">Track Your Stat's:</h3>
+          <p class="feature-desc">With real-time analytics—monitor performance, optimize content, and grow faster.</p>
+          
+          <div class="feature-visual">
+            <div class="stats-dashboard">
+              <div class="stats-header">
+                <div class="stats-title">Channel Performance</div>
+                <div class="stats-period">Last 30 days</div>
+              </div>
+              
+              <div class="stats-chart">
+                <div class="stats-bar" data-value="32.5K"></div>
+                <div class="stats-bar" data-value="48.2K"></div>
+                <div class="stats-bar" data-value="21.7K"></div>
+                <div class="stats-bar" data-value="56.9K"></div>
+                <div class="stats-bar" data-value="39.1K"></div>
+              </div>
+              
+              <div class="stats-labels">
+                <div class="stats-label">Mon</div>
+                <div class="stats-label">Tue</div>
+                <div class="stats-label">Wed</div>
+                <div class="stats-label">Thu</div>
+                <div class="stats-label">Fri</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Feature 5 -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <img src="images/image20.png" alt="Auto Captions" width="32" height="32">
+          </div>
+          <h3 class="feature-title">Instant Auto Captions:</h3>
+          <p class="feature-desc">Powered by Eleven Labs—effortlessly generate accurate, engaging captions for your Shorts in seconds.</p>
+        </div>
+        
+        <!-- Feature 6 -->
+        <div class="feature-card">
+          <div class="feature-icon">
+            <img src="images/image25.png" alt="One Click Posting" width="32" height="32">
+          </div>
+          <h3 class="feature-title">One Click Posting:</h3>
+          <p class="feature-desc">Lets you instantly upload across all platforms—no manual uploading, just immediate engagement.</p>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 3rem;">
+        <p class="text-mono text-muted">After joining, you will have ALL the tools you need to go viral time after time.</p>
+        <a href="#" class="btn btn-primary animate-pulse" style="margin-top: 1.5rem;">
+          Get Started
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0L6.59 1.41L12.17 7H0V9H12.17L6.59 14.59L8 16L16 8L8 0Z" fill="white"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Success Stories Section -->
+  <section class="success-section" id="why-us">
+    <div class="container">
+      <div class="success-header">
+        <div class="feature-tag">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0L6.59 1.41L12.17 7H0V9H12.17L6.59 14.59L8 16L16 8L8 0Z" fill="white"/>
+          </svg>
+          <span>Proven Success With YT Shorts</span>
+        </div>
+        
+        <h2>Over <span class="text-accent">500+ MILLION VIEWS</span> Gained With These Tools!</h2>
+      </div>
+    </div>
+    
+    <div class="success-carousel">
+      <div class="success-fade left"></div>
+      <div class="success-carousel-inner">
+        <!-- First set of images -->
+        <div class="success-card">
+          <img src="images/image12.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image13.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image15.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image16.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image17.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image18.png" alt="Success Story" class="success-image">
+        </div>
+        <!-- Duplicate set for continuous scrolling -->
+        <div class="success-card">
+          <img src="images/image12.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image13.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image15.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image16.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image17.png" alt="Success Story" class="success-image">
+        </div>
+        <div class="success-card">
+          <img src="images/image18.png" alt="Success Story" class="success-image">
+        </div>
+      </div>
+      <div class="success-fade right"></div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials-section">
+    <div class="container">
+      <div class="testimonials-header">
+        <div class="feature-tag">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0L6.59 1.41L12.17 7H0V9H12.17L6.59 14.59L8 16L16 8L8 0Z" fill="white"/>
+          </svg>
+          <span>Our Testimonials</span>
+        </div>
+        
+        <h2>Proven & trusted by our<br>pioneering <span class="text-accent">BETA v1</span> creators.</h2>
+        
+        <p class="text-mono text-muted">A high quality product for our high quality creators.</p>
+      </div>
+      
+      <div class="testimonials-grid">
+        <!-- Testimonial 1 -->
+        <div class="testimonial-card">
+          <div class="testimonial-profile">
+            <div class="testimonial-avatar">
+              <img src="images/image8.png" alt="RedditMaven">
+            </div>
+            <div class="testimonial-info">
+              <h4>@RedditMaven</h4>
+              <p>78,000,000 million views</p>
+            </div>
+          </div>
+          <div class="testimonial-stars">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+          </div>
+          <p class="testimonial-text">"The time I save using Shortsify is unbelievable. What used to take hours now takes minutes."</p>
+        </div>
+        
+        <!-- Testimonial 2 -->
+        <div class="testimonial-card">
+          <div class="testimonial-profile">
+            <div class="testimonial-avatar">
+              <img src="images/image9.png" alt="FootyEdits">
+            </div>
+            <div class="testimonial-info">
+              <h4>@FootyEdits</h4>
+              <p>270,000,000 million views</p>
+            </div>
+          </div>
+          <div class="testimonial-stars">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+          </div>
+          <p class="testimonial-text">"Shortsify's AI presets took my soccer highlight reels to the next level—pure game-changer!"</p>
+        </div>
+        
+        <!-- Testimonial 3 -->
+        <div class="testimonial-card">
+          <div class="testimonial-profile">
+            <div class="testimonial-avatar">
+              <img src="images/image10.png" alt="ContentKing99">
+            </div>
+            <div class="testimonial-info">
+              <h4>@ContentKing99</h4>
+              <p>125,000,000 million views</p>
+            </div>
+          </div>
+          <div class="testimonial-stars">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+            <img src="images/image11.png" alt="Star">
+          </div>
+          <p class="testimonial-text">"From auto-captions to one-click uploads, Shortsify makes creating viral content effortless"</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section - Logo moved inside -->
+  <section class="cta-section">
+    <div class="cta-wrapper">
+      <div class="cta-background">
+        <div class="cta-overlay"></div>
+        <img src="images/image5.png" alt="Background">
+      </div>
+      <div class="cta-content">
+        <!-- Logo moved inside the content -->
+        <div class="cta-logo-container">
+          <div class="cta-logo">
+            <img src="images/image6.png" alt="Shortsify Logo">
+          </div>
+        </div>
+        
+        <h2 class="cta-title">Effortlessly create Shorts<br>at the <span class="text-highlight">SNAP OF YOUR FINGERS.</span></h2>
+        
+        <p class="cta-description">Shortsify instantly creates viral short-form content with AI—no more wasting hours on editing.</p>
+        
+        <div class="email-signup">
+          <input type="email" placeholder="Enter your email address..." class="email-input">
+          <button class="email-submit">Join Wait-list</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="faq-section" id="faq">
+    <div class="container">
+      <div class="faq-header">
+        <div class="feature-tag">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8 0L6.59 1.41L12.17 7H0V9H12.17L6.59 14.59L8 16L16 8L8 0Z" fill="white"/>
+          </svg>
+          <span>Our Top Asked Question's</span>
+        </div>
+        
+        <h2>Frequently <span class="text-accent">Asked</span> Questions</h2>
+        
+        <p class="text-muted">Do you Still Have Any Questions?</p>
+      </div>
+      
+      <div class="faq-grid">
+        <!-- FAQ Item 1 -->
+        <div class="faq-item">
+          <h3 class="faq-question">What is Shortsify? <span class="faq-toggle">+</span></h3>
+          <div class="faq-answer">
+            <p>An AI-powered software that creates and uploads viral short-form videos instantly.</p>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 2 -->
+        <div class="faq-item">
+          <h3 class="faq-question">Is Shortsify free to use? <span class="faq-toggle">+</span></h3>
+          <div class="faq-answer">
+            <p>No, Shortsify is a premium tool.<br>AI processing comes at a cost, ensuring high-quality.</p>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 3 -->
+        <div class="faq-item">
+          <h3 class="faq-question">How will this help me grow? <span class="faq-toggle">+</span></h3>
+          <div class="faq-answer">
+            <p>Viral presets, analytics, and automation optimize your content for success.</p>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 4 -->
+        <div class="faq-item">
+          <h3 class="faq-question">What AI models are used? <span class="faq-toggle">+</span></h3>
+          <div class="faq-answer">
+            <p>We integrate top AI models like GPT-4, Claude 3.7, Grok 3.0, Eleven Labs and many more!</p>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 5 -->
+        <div class="faq-item">
+          <h3 class="faq-question">Do I need editing experience? <span class="faq-toggle">+</span></h3>
+          <div class="faq-answer">
+            <p>Nope! Shortsify automates everything—captions, cuts, and scripts.</p>
+          </div>
+        </div>
+        
+        <!-- FAQ Item 6 -->
+        <div class="faq-item">
+          <h3 class="faq-question">Can I post directly in the app? <span class="faq-toggle">+</span></h3>
+          <div class="faq-answer">
+            <p>Yes! One-click posting lets you instantly share your viral short-form content once made.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer" id="contact">
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <img src="images/image6.png" alt="Shortsify Logo" class="footer-logo">
+          <p>Generate viral short-form content effortlessly with Shortsify's AI-powered platform.</p>
+          <div class="footer-social">
+            <a href="#" class="social-icon">
+              <img src="images/image3.png" alt="Twitter">
+            </a>
+            <a href="#" class="social-icon">
+              <img src="images/image2.png" alt="Instagram">
+            </a>
+            <a href="#" class="social-icon">
+              <img src="images/image4.png" alt="Discord">
+            </a>
+          </div>
+        </div>
+        
+        <div class="footer-nav">
+          <h4>Navigation</h4>
+          <ul class="footer-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#why-us">Why Us?</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#faq">Q&A's</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-nav">
+          <h4>Legal</h4>
+          <ul class="footer-links">
+            <li><a href="#">Terms</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Refund Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>Copyright © 2025 Shortsify</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Toggle FAQ collapsible functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const faqItems = document.querySelectorAll('.faq-item');
+      
+      faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question');
+        
+        question.addEventListener('click', () => {
+          // Close all other FAQs
+          faqItems.forEach(otherItem => {
+            if (otherItem !== item && otherItem.classList.contains('active')) {
+              otherItem.classList.remove('active');
+            }
+          });
+          
+          // Toggle the clicked FAQ
+          item.classList.toggle('active');
+        });
+      });
+
+      // Fix CTA image display
+      const ctaBackground = document.querySelector('.cta-background');
+      if (ctaBackground) {
+        const img = ctaBackground.querySelector('img');
+        if (img) {
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+        }
+      }
+      
+      // Add hover effects to stats bars
+      const statsBars = document.querySelectorAll('.stats-bar');
+      if (statsBars.length > 0) {
+        statsBars.forEach(bar => {
+          bar.addEventListener('mouseenter', function() {
+            this.style.transform = 'scaleY(1.05)';
+          });
+          
+          bar.addEventListener('mouseleave', function() {
+            this.style.transform = 'scaleY(1)';
+          });
+        });
+      }
+      
+      // Smooth scrolling for navigation links
+      const links = document.querySelectorAll('a[href^="#"]');
+      links.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const targetId = this.getAttribute('href');
+          if (targetId === '#') return;
+          
+          const targetElement = document.querySelector(targetId);
+          if (targetElement) {
+            window.scrollTo({
+              top: targetElement.offsetTop - 100,
+              behavior: 'smooth'
+            });
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
